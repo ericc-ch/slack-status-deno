@@ -23,17 +23,31 @@ export class SlackAPI {
   teamToken: NullableString = ENV_TOKEN;
   headers: Headers = new Headers();
 
-  static oneLiner(property: string) {
+  /**
+   * Generate a one-liner based on a property from the first team object stored in local storage.
+   *
+   * @param property - the property to retrieve from the team object
+   * @return the value of the specified property from the first team object
+   */
+  static oneLiner(property: string): string {
     return `Object.values(JSON.parse(globalThis.localStorage.getItem("${KEY_CONFIG}")).teams)[0].${property}`;
   }
 
+  /**
+   * Validates the credentials by checking the presence of team token, base URL, and cookie in the headers.
+   */
   validateCredentials() {
     if (!this.teamToken) throw new Error("No token found");
     if (!this.baseUrl) throw new Error("No base url found");
     if (!this.headers.has("cookie")) throw new Error("No cookie found");
   }
 
-  init() {
+  /**
+   * Initializes the function by setting the base URL, team token, and dCookie, as well as creating the headers.
+   *
+   * @return The initialized instance of the class.
+   */
+  init(): this {
     if (!this.baseUrl || !this.teamToken) {
       console.log("Copy this line into your browser console: \n");
       console.log(SlackAPI.oneLiner("token"));
@@ -54,7 +68,13 @@ export class SlackAPI {
     return this;
   }
 
-  updateProfile(profile: PayloadProfile) {
+  /**
+   * Updates the profile with the given PayloadProfile.
+   *
+   * @param profile - data to update the profile with
+   * @return the response from the API
+   */
+  updateProfile(profile: PayloadProfile): Promise<unknown> {
     this.validateCredentials();
 
     const url = new URL(`/api/users.profile.set`, this.baseUrl!);
@@ -77,7 +97,13 @@ export class SlackAPI {
     });
   }
 
-  uploadPicture<T extends Blob>(file: T) {
+  /**
+   * Uploads a picture file to the server.
+   *
+   * @param file - the picture file to upload
+   * @return response of the picture upload response
+   */
+  uploadPicture<T extends Blob>(file: T): Promise<ResponsePictureUpload> {
     this.validateCredentials();
 
     const url = new URL(`/api/users.preparePhoto`, this.baseUrl!);
@@ -100,7 +126,15 @@ export class SlackAPI {
     });
   }
 
-  updateProfilePicture(payload: PayloadSetPhoto) {
+  /**
+   * Update the user's profile picture.
+   *
+   * @param payload - the payload containing the new photo
+   * @return the picture upload response
+   */
+  updateProfilePicture(
+    payload: PayloadSetPhoto
+  ): Promise<ResponsePictureUpload> {
     this.validateCredentials();
 
     const url = new URL(`/api/users.setPhoto`, this.baseUrl!);
